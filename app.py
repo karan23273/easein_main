@@ -2,18 +2,18 @@ import streamlit as st
 from src.screen.home_screen import home_screen
 from src.screen.teacher_screen import teacher_screen
 from src.screen.student_screen import student_screen
-from src.componet.header import header
-from src.ui.style_base_layout import style_base_layout, style_hide, style_font
+from src.ui.base_layout import style_hide, style_font
+
 
 def main():
     if 'login-type' not in st.session_state:
         st.session_state['login-type'] = None
         # st.session_state.key = 'value'
-    style_font()
-    header()
 
+    # common layout applied to every screen so edges align
     style_hide()
-    style_base_layout()
+    style_font()
+
     match st.session_state['login-type']:
         case 'teacher':
             teacher_screen()
@@ -33,18 +33,3 @@ main()
     # with col2:
     #     if st.button("fuck you", type="primary", key='2', width='content'):
     #         print("ohh yeah")
-
-    # st.markdown("""
-    #             ### Heading `code`
-    # """)
-    
-    # st.markdown("""
-    #             <style>
-    #                 button{
-    #                 background : cyan !important;
-    #             }
-    #             </style>
-    # <head>head </head>
-    # <div> erf </div>
-    
-    # """, unsafe_allow_html=True)

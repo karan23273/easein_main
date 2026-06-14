@@ -2,7 +2,7 @@ import streamlit as st
 import pathlib
 import base64
 
-def style_base_layout():
+def style_background_home():
     st.markdown("""
         <style>
             .stApp{
@@ -17,6 +17,17 @@ def style_base_layout():
 
     """, unsafe_allow_html=True)
 
+def style_background_dashboard():
+
+    st.markdown("""
+        <style>
+            .stApp {
+                background: #E0E3FF !important;
+            }
+        </style>  
+            """,unsafe_allow_html=True)
+
+ 
 def style_font():
     font_path = "src/assets/Game of Thrones.ttf"
     font_bytes = pathlib.Path(font_path).read_bytes()
@@ -35,13 +46,13 @@ def style_font():
         }
         h1{
             font-family: 'Black Ops One', sans-serif !important;
-            font-size: 4.5rem !important;
+            font-size: 4.5rem;
             line-height: 1.1 !important;
             margin-bottom: 0rem !important;
         }
         h2{
             font-family: 'My font', sans-serif !important;
-            font-size: 2.5rem !important;
+            font-size: 2.5rem;
             line-height: 1.1 !important;
             margin-bottom: 0rem !important;
         }
@@ -51,7 +62,7 @@ def style_font():
         
         button[kind='primary']{
             border-radius: 12px !important;
-            background: #E05454 !important;
+            background: #FF97D0 !important;
             color: Black !important;
             font-weight: 600 !important;
             padding: 0.65rem 1.2rem !important;
@@ -99,7 +110,11 @@ def style_hide():
                 visibility:hidden    
             }
             .block-container{
-                padding-top: 1.5rem !important    
+                padding-top: 1.5rem !important;
+                padding-left: 3rem !important;
+                padding-right: 3rem !important;
+                max-width: 1000px !important;
+                margin: 0 auto !important;
             }
         </style>
 
