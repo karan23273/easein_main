@@ -10,7 +10,7 @@ def hash_pass(user_password):
     return bcrypt.hashpw(user_password.encode(), bcrypt.gensalt()).decode()
 
 def match_pass(hashed, user_password):
-    return bcrypt.checkpw(user_password.encode(), hashed.code())
+    return bcrypt.checkpw(user_password.encode(), hashed.encode())
 
 def create_teacher(teacher_user_name, teacher_name, teacher_user_pass):
     data ={
@@ -22,7 +22,7 @@ def create_teacher(teacher_user_name, teacher_name, teacher_user_pass):
     return response.data
 
 def teacher_login(teacher_user_name, teacher_user_pass):
-    response = supabase.table('teacher').select('*').eql('teacher_user_name', teacher_user_name).execute()
+    response = supabase.table('teacher').select('*').eq('teacher_user_name', teacher_user_name).execute()
 
     if response.data:
         teacher = response.data[0]
@@ -31,4 +31,6 @@ def teacher_login(teacher_user_name, teacher_user_pass):
     
     return None
 
-    
+def get_all_students():
+    response = supabase.table('student').select('*').execute()
+    return response.data

@@ -20,5 +20,8 @@ pillow # For image processing
 
 streamlit # 
 
+librosa
+resemblyzer
+
 
  
