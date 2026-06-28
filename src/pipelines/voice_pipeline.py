@@ -26,7 +26,7 @@ def get_voice_embeddings(audio_bytes):
 def identify_speaker(new_embedding, candidates_dict, threshold=0.65):
     if new_embedding is None or not candidates_dict:
         return None, 0.0
-    
+       
     best_sid = None
     best_score = -1.0
 

@@ -13,6 +13,7 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 from src.componet.dialog_attendance_results import attendance_result_dialog
+from src.componet.dialog_voice_attendance import voice_attendance_dialog
 
 def teacher_screen():
     style_background_dashboard()
@@ -21,7 +22,7 @@ def teacher_screen():
     
     if 'teacher_data' in st.session_state:
         teacher_dashboard()
-    elif 'teacher_login_type' not in st.session_state or st.session_state.teacher_login_type == "login":
+    elif 'teacher_lo gin_type' not in st.session_state or st.session_state.teacher_login_type == "login":
         teacher_screen_login()
     elif st.session_state.teacher_login_type == "register":
         teacher_screen_register()
@@ -248,16 +249,21 @@ def teacher_tab_take_attendance():
     
     subject_options = {f"{s['subject_name']} - {s['subject_code']}": s['subject_id'] for s in subjects}
 
-    col1, col2 = st.columns([3,1], vertical_alignment='bottom')
+    selceted_subject_label = st.selectbox('Select Subject', options=list(subject_options.keys()))
+    
+    col1, col2= st.columns(2, vertical_alignment='bottom')
     with col1:
-        selceted_subject_label = st.selectbox('Select Subject', options=list(subject_options.keys()))
-
-    with col2:
         if st.button('Add Photos', type = 'primary', icon= ':material/photo_prints:', width = 'stretch'):
             add_photos_dialog()
 
+    # with col2:
+
     selceted_subject_id = subject_options[selceted_subject_label]
     st.divider()
+    
+    #  Get enrolled student
+    enrolled_res = supabase.table('subject_students').select('*, student(*)').eq('subject_id', selceted_subject_id).execute()
+    enrolled_students = enrolled_res.data
 
     if st.session_state.attendance_images:
         st.markdown(f"""<h3 style= "font-size:20px; text-align:center, width:content;">Added Photos</h3>""", unsafe_allow_html=True)
@@ -267,13 +273,13 @@ def teacher_tab_take_attendance():
             with gallery_cols[idx % 4]:
                 st.image(img, width='stretch', caption=f'Phots id:{idx+1}')
 
-        c1, c2, c3 = st.columns(3)
+        c1, c2 = st.columns(2)
         with c1: 
             if st.button('Clear all photos', width='stretch', type='secondary'):
                 st.session_state.attendance_images = []
                 st.rerun()
         with c2:
-            has_photos = bool(st.session_state.attendance_images)
+            # has_photos = bool(st.session_state.attendance_images)
             if st.button('Analyze Photo', width='stretch', type='secondary'):
                 with st.spinner("Deep Scannig Photos"):
                     all_detetected_id = {}
@@ -286,8 +292,6 @@ def teacher_tab_take_attendance():
                             for sid in deteccted.keys():
                                 student_id = int(sid)
                                 all_detetected_id.setdefault(student_id, []).append(f"Photo {idx+1}")
-                    enrolled_res = supabase.table('subject_students').select('*, student(*)').eq('subject_id', selceted_subject_id).execute()
-                    enrolled_students = enrolled_res.data
             
                     if not enrolled_students:
                         st.warning("No student enrolled in this course")
@@ -307,14 +311,15 @@ def teacher_tab_take_attendance():
                                     'Status': "Present" if is_present else "Absent"
                                 })
                                 attendance_to_log.append({
-                                    'student_id': student['student_name'],
+                                    'student_id': student['student_id'],
                                     'subject_id': selceted_subject_id,
                                     'timestamp':current_timestamp,
                                     'is_present': bool(is_present)
                                 })
                         attendance_result_dialog(pd.DataFrame(results), attendance_to_log)
-        with c3:
-            st.button('Use Voice Attendance', type='secondary', width='stretch', icon=':material/mic:') 
+    with col2:
+        if st.button('Use Voice Attendance', type='secondary', width='stretch', icon=':material/mic:'):
+            voice_attendance_dialog(selceted_subject_id, enrolled_students) 
 
 def teacher_tab_attendance_record():
     st.header("Attendance report")
