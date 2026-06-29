@@ -1,7 +1,7 @@
 import streamlit as st
 from src.ui.base_layout import style_background_dashboard,style_font,style_hide
 from src.componet.header import header_dashboard
-from src.database.db import check_teacher_exist, create_teacher, teacher_login, get_teacher_subject
+from src.database.db import check_teacher_exist, create_teacher, teacher_login, get_teacher_subject, get_attendance_for_teacher
 import time
 from src.componet.dialog_create_subject import create_subject_dialog
 from src.componet.subject_card import subject_card
@@ -206,7 +206,7 @@ def teacher_tab_manage_subject():
 
     col1,col2 = st.columns([2,1], vertical_alignment='center', gap='xxlarge', width='stretch')
     with col1:
-        st.markdown(f"""<h3 style= "font-size:30px; text-align:center, width:content;">Manage Subjects</h3>""", unsafe_allow_html=True)
+        st.markdown(f"""<h2 style= "font-size:20px; text-align:center, width:content;">Manage Subject</h2>""", unsafe_allow_html=True)
     with col2:
         if st.button('Create new subject', width='stretch'):
             create_subject_dialog(teacher_id)
@@ -236,6 +236,7 @@ def teacher_tab_manage_subject():
     
 def teacher_tab_take_attendance():
     teacher_id = st.session_state.teacher_data['teacher_id']
+
     st.markdown(f"""<h2 style= "font-size:20px; text-align:center, width:content;">Take   AI   attendance</h2>""", unsafe_allow_html=True)
 
     if 'attendance_images' not in st.session_state:
@@ -260,7 +261,7 @@ def teacher_tab_take_attendance():
 
     selceted_subject_id = subject_options[selceted_subject_label]
     st.divider()
-    
+
     #  Get enrolled student
     enrolled_res = supabase.table('subject_students').select('*, student(*)').eq('subject_id', selceted_subject_id).execute()
     enrolled_students = enrolled_res.data
@@ -322,4 +323,57 @@ def teacher_tab_take_attendance():
             voice_attendance_dialog(selceted_subject_id, enrolled_students) 
 
 def teacher_tab_attendance_record():
-    st.header("Attendance report")
+    st.markdown(f"""<h2 style= "font-size:20px; text-align:center, width:content;">Attendance Report</h2>""", unsafe_allow_html=True)
+
+    teacher_id = st.session_state.teacher_data["teacher_id"]
+
+    records = get_attendance_for_teacher(teacher_id)
+
+    if not records:
+        st.info("No attendance records found.")
+        return
+
+    data = []
+
+    for r in records:
+        ts = r.get("timestamp")
+
+        data.append({
+            "ts_group": ts.split(".")[0] if ts else None,
+            "Time": datetime.fromisoformat(ts).strftime("%Y-%m-%d %I:%M %p") if ts else None,
+            "Subject": r["subject"]["subject_name"],
+            "Subject Code": r["subject"]["subject_code"],
+            "is_present": bool(r.get("is_present", False))
+        })
+
+    df = pd.DataFrame(data)
+
+    summary = (
+        df.groupby(
+            ["ts_group", "Time", "Subject", "Subject Code"],
+            as_index=False
+        )
+        .agg(
+            Present_Count=("is_present", "sum"),
+            Total_Count=("is_present", "count")
+        )
+    )
+
+    summary["Attendance Stats"] = (
+        "✅ "
+        + summary["Present_Count"].astype(str)
+        + " / "
+        + summary["Total_Count"].astype(str)
+        + " Students"
+    )
+
+    display_df = (
+        summary.sort_values(by="ts_group", ascending=False)
+        [["Time", "Subject", "Subject Code", "Attendance Stats"]]
+    )
+
+    st.dataframe(
+        display_df,
+        use_container_width=True,
+        hide_index=True
+    )

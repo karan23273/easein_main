@@ -28,7 +28,7 @@ def voice_attendance_dialog(selected_subject_id, enrolled_students):
             current_timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
             for node in enrolled_students:
-                student = node['student'] ######################
+                student = node['student'] 
                 scores = detetected_scores.get(student['student_id'], 0.0)
                 is_present = bool(scores) > 0
                 if is_present:

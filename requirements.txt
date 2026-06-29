@@ -1,3 +1,4 @@
+streamlit 
 # To install all pip install -r requirements.txt
 numpy
 pandas
@@ -18,7 +19,6 @@ segno # for QR code generator
 
 pillow # For image processing
 
-streamlit # 
 
 librosa
 resemblyzer

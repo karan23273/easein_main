@@ -4,8 +4,15 @@ from src.screen.teacher_screen import teacher_screen
 from src.screen.student_screen import student_screen
 from src.ui.base_layout import style_hide, style_font
 from src.componet.dialog_auto_enroll import auto_enroll_dialog
+from PIL import Image
 
 def main():
+    st.set_page_config(
+        page_title="EaseIN - Making attendance faster",
+        page_icon=Image.open("src/assets/attendance.png")
+    )
+
+    
     if 'login-type' not in st.session_state:
         st.session_state['login-type'] = None
         # st.session_state.key = 'value'
